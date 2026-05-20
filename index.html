@@ -279,23 +279,134 @@ input,select,textarea{
 
 @media(max-width:900px){
 
-    .sidebar{
-        width:100px;
-        padding:15px;
-    }
+.sidebar{
+    width:100px;
+    padding:15px;
+}
 
-    .sidebar .logo{
-        font-size:18px;
-    }
+.sidebar .logo{
+    font-size:18px;
+}
 
-    .menu button{
-        font-size:12px;
-        padding:12px;
-    }
+.menu button{
+    font-size:12px;
+    padding:12px;
+}
 
-    .main{
-        margin-left:100px;
-    }
+.main{
+    margin-left:100px;
+    padding:20px;
+}
+}
+
+@media(max-width:768px){
+
+body{
+    flex-direction:column;
+}
+
+.sidebar{
+    width:100%;
+    height:auto;
+    position:fixed;
+    bottom:0;
+    top:auto;
+    left:0;
+    z-index:1000;
+    padding:10px;
+    border-right:none;
+    border-top:1px solid #1f2937;
+}
+
+.logo{
+    display:none;
+}
+
+.menu{
+    flex-direction:row;
+    justify-content:space-around;
+    gap:8px;
+}
+
+.menu button{
+    flex:1;
+    padding:10px 5px;
+    font-size:11px;
+    border-radius:10px;
+    text-align:center;
+}
+
+.main{
+    margin-left:0;
+    margin-bottom:90px;
+    padding:15px;
+}
+
+.topbar{
+    flex-direction:column;
+    align-items:flex-start;
+    gap:15px;
+}
+
+.title{
+    font-size:24px;
+}
+
+.stats{
+    grid-template-columns:1fr;
+}
+
+.grid{
+    grid-template-columns:1fr;
+}
+
+.panel{
+    padding:18px;
+    border-radius:16px;
+}
+
+.panel-title{
+    font-size:20px;
+}
+
+.card{
+    padding:20px;
+}
+
+.card h1{
+    font-size:26px;
+}
+
+.table{
+    display:block;
+    overflow-x:auto;
+    white-space:nowrap;
+}
+
+.modal-content{
+    width:95%;
+    padding:20px;
+    max-height:90vh;
+    overflow-y:auto;
+}
+
+.actions{
+    flex-direction:column;
+}
+
+.btn{
+    width:100%;
+}
+
+.chart-box{
+    height:300px;
+}
+
+input,
+select,
+textarea{
+    font-size:16px;
+}
 }
 </style>
 </head>
