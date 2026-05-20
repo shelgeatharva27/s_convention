@@ -1,0 +1,899 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>S_Convention Management</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --navy: #0f1629;
+    --navy2: #1a2540;
+    --navy3: #232f50;
+    --gold: #c9a84c;
+    --gold2: #e8c96b;
+    --gold-light: #fdf6e3;
+    --green: #1e8a5e;
+    --green-bg: #e6f5ee;
+    --amber: #b86e00;
+    --amber-bg: #fff4e0;
+    --red: #b52b2b;
+    --red-bg: #fdecea;
+    --blue: #1c5cb5;
+    --blue-bg: #e8f0fd;
+    --surface: #ffffff;
+    --surface2: #f5f6fa;
+    --border: #e4e7f0;
+    --text: #0f1629;
+    --text2: #4a5270;
+    --text3: #9098b8;
+    --radius: 14px;
+    --shadow: 0 2px 16px rgba(15,22,41,0.08);
+    --shadow-md: 0 4px 24px rgba(15,22,41,0.12);
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'DM Sans', sans-serif; background: var(--surface2); color: var(--text); min-height: 100vh; }
+
+  /* TOPBAR */
+  .topbar {
+    background: var(--navy);
+    padding: 0 28px;
+    display: flex;
+    align-items: stretch;
+    gap: 0;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 20px rgba(0,0,0,0.25);
+  }
+  .brand {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 14px 24px 14px 0;
+    border-right: 1px solid rgba(255,255,255,0.08);
+    margin-right: 8px;
+  }
+  .brand-name { font-family: 'DM Serif Display', serif; font-size: 20px; color: var(--gold2); letter-spacing: 0.5px; }
+  .brand-sub { font-size: 10px; color: rgba(255,255,255,0.35); letter-spacing: 2px; text-transform: uppercase; margin-top: 2px; }
+  .nav-tabs { display: flex; align-items: stretch; flex: 1; }
+  .nav-tab {
+    display: flex; align-items: center; gap: 8px;
+    padding: 0 20px;
+    background: transparent; border: none; border-bottom: 3px solid transparent;
+    color: rgba(255,255,255,0.45); font-size: 13.5px; font-weight: 500;
+    cursor: pointer; transition: all 0.2s; font-family: 'DM Sans', sans-serif;
+    white-space: nowrap;
+  }
+  .nav-tab:hover { color: rgba(255,255,255,0.8); background: rgba(255,255,255,0.04); }
+  .nav-tab.active { color: #fff; border-bottom-color: var(--gold); background: rgba(201,168,76,0.08); }
+  .nav-tab .tab-icon { font-size: 16px; }
+  .topbar-stats { display: flex; align-items: center; gap: 24px; margin-left: auto; padding-left: 24px; border-left: 1px solid rgba(255,255,255,0.08); }
+  .stat-item { text-align: right; }
+  .stat-label { font-size: 10px; color: rgba(255,255,255,0.35); text-transform: uppercase; letter-spacing: 1px; }
+  .stat-val { font-size: 17px; font-weight: 700; }
+  .stat-val.green { color: #6ee7b7; }
+  .stat-val.amber { color: #fcd34d; }
+  .stat-val.gold { color: var(--gold2); }
+
+  /* PAGES */
+  .page { display: none; padding: 28px; animation: fadeIn 0.25s ease; }
+  .page.active { display: block; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* PAGE HEADERS */
+  .page-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 24px; }
+  .page-title { font-family: 'DM Serif Display', serif; font-size: 26px; color: var(--navy); }
+  .page-sub { font-size: 13px; color: var(--text3); margin-top: 3px; }
+  .btn-primary {
+    background: var(--navy); color: #fff; border: none; border-radius: 10px;
+    padding: 10px 20px; font-size: 13.5px; font-weight: 600; cursor: pointer;
+    display: inline-flex; align-items: center; gap: 6px; transition: background 0.2s;
+    font-family: 'DM Sans', sans-serif;
+  }
+  .btn-primary:hover { background: var(--navy3); }
+
+  /* STAT CARDS */
+  .stat-cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 24px; }
+  .stat-card {
+    border-radius: var(--radius); padding: 16px 18px; cursor: pointer;
+    border: 2px solid transparent; transition: all 0.2s;
+  }
+  .stat-card:hover { transform: translateY(-1px); }
+  .stat-card.active-filter { border-color: currentColor; }
+  .stat-card .sc-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; opacity: 0.65; }
+  .stat-card .sc-val { font-size: 32px; font-weight: 700; margin-top: 4px; }
+  .sc-all { background: var(--blue-bg); color: var(--blue); }
+  .sc-accepted { background: var(--green-bg); color: var(--green); }
+  .sc-followup { background: var(--amber-bg); color: var(--amber); }
+  .sc-rejected { background: var(--red-bg); color: var(--red); }
+
+  /* BADGES */
+  .badge {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 3px 10px; border-radius: 20px; font-size: 11.5px; font-weight: 700;
+  }
+  .badge::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+  .badge-accepted { background: var(--green-bg); color: var(--green); }
+  .badge-followup { background: var(--amber-bg); color: var(--amber); }
+  .badge-rejected { background: var(--red-bg); color: var(--red); }
+
+  /* LEAD CARDS */
+  .leads-list { display: flex; flex-direction: column; gap: 10px; }
+  .lead-card {
+    background: var(--surface); border-radius: var(--radius); padding: 16px 20px;
+    display: flex; align-items: center; gap: 16px;
+    box-shadow: var(--shadow); border: 1px solid var(--border);
+    transition: box-shadow 0.2s, transform 0.15s;
+  }
+  .lead-card:hover { box-shadow: var(--shadow-md); transform: translateY(-1px); }
+  .lead-avatar {
+    width: 46px; height: 46px; border-radius: 50%; background: var(--navy);
+    color: var(--gold2); display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 17px; flex-shrink: 0; font-family: 'DM Serif Display', serif;
+  }
+  .lead-info { flex: 1; min-width: 0; }
+  .lead-name { font-weight: 700; font-size: 15px; color: var(--text); display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .lead-meta { display: flex; gap: 14px; margin-top: 5px; flex-wrap: wrap; }
+  .lead-meta span { font-size: 12.5px; color: var(--text2); display: flex; align-items: center; gap: 4px; }
+  .lead-notes { font-size: 12px; color: var(--text3); font-style: italic; margin-top: 4px; }
+  .lead-actions { display: flex; gap: 6px; flex-shrink: 0; flex-wrap: wrap; justify-content: flex-end; }
+  .action-btn {
+    padding: 5px 11px; border: none; border-radius: 7px;
+    font-size: 11px; font-weight: 700; cursor: pointer; transition: all 0.15s;
+    font-family: 'DM Sans', sans-serif;
+  }
+  .action-btn:hover { filter: brightness(0.92); transform: scale(0.97); }
+  .action-btn.edit { background: var(--surface2); color: var(--text2); border: 1px solid var(--border); }
+  .btn-accept { background: var(--green-bg); color: var(--green); }
+  .btn-followup { background: var(--amber-bg); color: var(--amber); }
+  .btn-reject { background: var(--red-bg); color: var(--red); }
+  .empty-state { text-align: center; padding: 48px; color: var(--text3); font-size: 14px; background: var(--surface); border-radius: var(--radius); border: 1px dashed var(--border); }
+
+  /* MODAL */
+  .modal-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.5);
+    z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 16px;
+    opacity: 0; pointer-events: none; transition: opacity 0.2s;
+  }
+  .modal-overlay.open { opacity: 1; pointer-events: all; }
+  .modal {
+    background: #fff; border-radius: 18px; padding: 28px; width: 100%; max-width: 490px;
+    max-height: 90vh; overflow-y: auto; transform: translateY(20px); transition: transform 0.2s;
+    box-shadow: 0 24px 80px rgba(0,0,0,0.2);
+  }
+  .modal-overlay.open .modal { transform: translateY(0); }
+  .modal-title { font-family: 'DM Serif Display', serif; font-size: 20px; color: var(--navy); margin-bottom: 22px; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .form-group { margin-bottom: 14px; }
+  .form-label { display: block; font-size: 11px; font-weight: 700; color: var(--text2); text-transform: uppercase; letter-spacing: 0.7px; margin-bottom: 5px; }
+  .form-input {
+    width: 100%; padding: 10px 13px; border: 1.5px solid var(--border); border-radius: 9px;
+    font-size: 14px; font-family: 'DM Sans', sans-serif; color: var(--text);
+    outline: none; transition: border-color 0.2s; background: #fafbff;
+  }
+  .form-input:focus { border-color: var(--navy); background: #fff; }
+  .status-select { display: flex; gap: 8px; margin-bottom: 14px; }
+  .status-btn {
+    flex: 1; padding: 8px 4px; border: 2px solid var(--border); border-radius: 8px;
+    background: #fff; font-size: 12px; font-weight: 700; cursor: pointer; transition: all 0.15s;
+    font-family: 'DM Sans', sans-serif;
+  }
+  .status-btn.sel-accepted { border-color: var(--green); background: var(--green-bg); color: var(--green); }
+  .status-btn.sel-followup { border-color: var(--amber); background: var(--amber-bg); color: var(--amber); }
+  .status-btn.sel-rejected { border-color: var(--red); background: var(--red-bg); color: var(--red); }
+  .modal-footer { display: flex; gap: 10px; margin-top: 20px; }
+  .btn-cancel { flex: 1; padding: 11px; border: 1.5px solid var(--border); border-radius: 9px; background: #fff; cursor: pointer; font-size: 14px; font-family: 'DM Sans', sans-serif; color: var(--text2); }
+  .btn-save { flex: 2; padding: 11px; border: none; border-radius: 9px; background: var(--navy); color: #fff; cursor: pointer; font-size: 14px; font-weight: 700; font-family: 'DM Sans', sans-serif; }
+  .btn-save:hover { background: var(--navy3); }
+
+  /* CALENDAR */
+  .cal-layout { display: grid; grid-template-columns: 1fr 300px; gap: 20px; }
+  .cal-card { background: var(--surface); border-radius: var(--radius); padding: 24px; box-shadow: var(--shadow); border: 1px solid var(--border); }
+  .cal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+  .cal-month { font-family: 'DM Serif Display', serif; font-size: 20px; color: var(--navy); }
+  .cal-nav { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; width: 34px; height: 34px; cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center; transition: background 0.15s; }
+  .cal-nav:hover { background: var(--border); }
+  .cal-days-header { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; margin-bottom: 6px; }
+  .cal-day-label { text-align: center; font-size: 11px; font-weight: 700; color: var(--text3); padding: 4px 0; }
+  .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+  .cal-cell {
+    aspect-ratio: 1; border-radius: 10px; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; cursor: pointer; transition: all 0.15s;
+    border: 1.5px solid transparent; position: relative;
+  }
+  .cal-cell:hover { background: var(--surface2); }
+  .cal-cell.empty { pointer-events: none; }
+  .cal-cell.today { background: var(--blue-bg); border-color: var(--blue); }
+  .cal-cell.booked { background: var(--green-bg); }
+  .cal-cell.selected { background: var(--navy) !important; border-color: var(--navy) !important; }
+  .cal-cell .day-num { font-size: 14px; font-weight: 600; color: var(--text); }
+  .cal-cell.today .day-num { color: var(--blue); font-weight: 700; }
+  .cal-cell.selected .day-num { color: #fff; }
+  .cal-cell .day-bk { font-size: 10px; color: var(--green); font-weight: 700; }
+  .cal-cell.selected .day-bk { color: rgba(255,255,255,0.8); }
+  .cal-legend { display: flex; gap: 18px; margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border); }
+  .leg-item { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text2); }
+  .leg-dot { width: 14px; height: 14px; border-radius: 4px; border: 1px solid rgba(0,0,0,0.08); }
+
+  /* SIDEBAR */
+  .sidebar-panel { background: var(--surface); border-radius: var(--radius); padding: 20px; box-shadow: var(--shadow); border: 1px solid var(--border); margin-bottom: 14px; }
+  .sidebar-title { font-family: 'DM Serif Display', serif; font-size: 15px; color: var(--navy); margin-bottom: 12px; }
+  .day-booking-card { background: #f0faf5; border-radius: 10px; padding: 12px 14px; margin-bottom: 8px; border-left: 3px solid var(--green); }
+  .day-booking-name { font-weight: 700; font-size: 14px; color: var(--navy); }
+  .day-booking-meta { font-size: 12px; color: var(--text2); margin-top: 3px; }
+  .upcoming-item { display: flex; gap: 10px; align-items: center; margin-bottom: 12px; }
+  .date-badge { background: var(--navy); color: #fff; border-radius: 9px; padding: 6px 9px; text-align: center; min-width: 44px; flex-shrink: 0; }
+  .date-badge .db-day { font-size: 17px; font-weight: 700; line-height: 1; }
+  .date-badge .db-mon { font-size: 10px; opacity: 0.6; }
+  .upcoming-name { font-size: 13px; font-weight: 700; color: var(--navy); }
+  .upcoming-meta { font-size: 11px; color: var(--text3); }
+
+  /* BOOKINGS COLUMNS */
+  .booking-cols { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  .booking-col { background: var(--surface); border-radius: var(--radius); padding: 18px; box-shadow: var(--shadow); border: 1px solid var(--border); min-height: 200px; }
+  .col-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
+  .col-title { font-family: 'DM Serif Display', serif; font-size: 16px; color: var(--navy); }
+  .col-count { border-radius: 20px; padding: 2px 10px; font-size: 12px; font-weight: 700; }
+  .bk-card { background: var(--surface2); border-radius: 11px; padding: 13px 14px; margin-bottom: 10px; border: 1px solid var(--border); transition: box-shadow 0.15s; }
+  .bk-card:hover { box-shadow: var(--shadow); }
+  .bk-name { font-weight: 700; font-size: 14px; color: var(--navy); }
+  .bk-meta { font-size: 12px; color: var(--text2); margin-top: 3px; }
+  .bk-amount { display: inline-block; background: var(--green-bg); color: var(--green); border-radius: 6px; padding: 2px 8px; font-size: 12px; font-weight: 700; margin-top: 5px; }
+  .bk-actions { display: flex; gap: 5px; margin-top: 9px; }
+  .bk-btn { flex: 1; padding: 5px 0; border: none; border-radius: 6px; font-size: 11px; font-weight: 700; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: filter 0.15s; }
+  .bk-btn:hover { filter: brightness(0.92); }
+
+  /* FUNDS */
+  .funds-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 28px; }
+  .fund-card { border-radius: var(--radius); padding: 20px 22px; }
+  .fund-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; opacity: 0.65; }
+  .fund-val { font-size: 26px; font-weight: 700; margin-top: 6px; }
+  .funds-panels { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .funds-panel { background: var(--surface); border-radius: var(--radius); padding: 22px; box-shadow: var(--shadow); border: 1px solid var(--border); }
+  .funds-panel-title { font-family: 'DM Serif Display', serif; font-size: 17px; color: var(--navy); margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; }
+  .rev-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--border); }
+  .rev-item:last-child { border-bottom: none; }
+  .rev-name { font-size: 13px; font-weight: 600; color: var(--text); }
+  .rev-event { font-size: 11px; color: var(--text3); }
+  .rev-amount { font-size: 14px; font-weight: 700; color: var(--green); }
+  .exp-amount { color: var(--red); }
+  .add-exp-row { display: flex; gap: 8px; margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--border); }
+  .add-exp-row input { flex: 1; padding: 8px 10px; border: 1.5px solid var(--border); border-radius: 8px; font-size: 13px; font-family: 'DM Sans', sans-serif; outline: none; }
+  .add-exp-row input:focus { border-color: var(--navy); }
+  .add-exp-btn { background: var(--navy); color: #fff; border: none; border-radius: 8px; padding: 8px 14px; cursor: pointer; font-size: 13px; font-weight: 700; }
+  .btn-add-exp { background: var(--red-bg); color: var(--red); border: none; border-radius: 8px; padding: 6px 13px; font-size: 12px; font-weight: 700; cursor: pointer; font-family: 'DM Sans', sans-serif; }
+  .btn-add-exp:hover { background: #fad4d0; }
+  .profit-positive { color: var(--green); }
+  .profit-negative { color: var(--red); }
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="brand">
+    <div class="brand-name">🏛 S_Convention</div>
+    <div class="brand-sub">Management System</div>
+  </div>
+  <div class="nav-tabs">
+    <button class="nav-tab active" onclick="switchTab('leads')" id="tab-leads">
+      <span class="tab-icon">👥</span> Lead Tracking
+    </button>
+    <button class="nav-tab" onclick="switchTab('calendar')" id="tab-calendar">
+      <span class="tab-icon">📅</span> Calendar
+    </button>
+    <button class="nav-tab" onclick="switchTab('bookings')" id="tab-bookings">
+      <span class="tab-icon">📋</span> Booking Management
+    </button>
+    <button class="nav-tab" onclick="switchTab('funds')" id="tab-funds">
+      <span class="tab-icon">💰</span> Funds
+    </button>
+  </div>
+  <div class="topbar-stats">
+    <div class="stat-item">
+      <div class="stat-label">Confirmed</div>
+      <div class="stat-val green" id="top-confirmed">0</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-label">Follow-ups</div>
+      <div class="stat-val amber" id="top-followup">0</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-label">Revenue</div>
+      <div class="stat-val gold" id="top-revenue">₹0</div>
+    </div>
+  </div>
+</div>
+
+<!-- ── LEADS PAGE ── -->
+<div class="page active" id="page-leads">
+  <div class="page-header">
+    <div>
+      <div class="page-title">Lead Tracking</div>
+      <div class="page-sub">Manage all enquiries and booking requests</div>
+    </div>
+    <button class="btn-primary" onclick="openLeadModal()">＋ Add Lead</button>
+  </div>
+
+  <div class="stat-cards">
+    <div class="stat-card sc-all" onclick="filterLeads('all')" id="sc-all">
+      <div class="sc-label">All Leads</div>
+      <div class="sc-val" id="cnt-all">0</div>
+    </div>
+    <div class="stat-card sc-accepted" onclick="filterLeads('accepted')" id="sc-accepted">
+      <div class="sc-label">Accepted</div>
+      <div class="sc-val" id="cnt-accepted">0</div>
+    </div>
+    <div class="stat-card sc-followup" onclick="filterLeads('followup')" id="sc-followup">
+      <div class="sc-label">Follow Ups</div>
+      <div class="sc-val" id="cnt-followup">0</div>
+    </div>
+    <div class="stat-card sc-rejected" onclick="filterLeads('rejected')" id="sc-rejected">
+      <div class="sc-label">Rejected</div>
+      <div class="sc-val" id="cnt-rejected">0</div>
+    </div>
+  </div>
+
+  <div class="leads-list" id="leads-list"></div>
+</div>
+
+<!-- ── CALENDAR PAGE ── -->
+<div class="page" id="page-calendar">
+  <div class="page-header">
+    <div>
+      <div class="page-title">Booking Calendar</div>
+      <div class="page-sub">See when the hall is booked and when it's free</div>
+    </div>
+  </div>
+  <div class="cal-layout">
+    <div class="cal-card">
+      <div class="cal-header">
+        <button class="cal-nav" onclick="calPrev()">‹</button>
+        <div class="cal-month" id="cal-month-label"></div>
+        <button class="cal-nav" onclick="calNext()">›</button>
+      </div>
+      <div class="cal-days-header">
+        <div class="cal-day-label">Su</div><div class="cal-day-label">Mo</div>
+        <div class="cal-day-label">Tu</div><div class="cal-day-label">We</div>
+        <div class="cal-day-label">Th</div><div class="cal-day-label">Fr</div>
+        <div class="cal-day-label">Sa</div>
+      </div>
+      <div class="cal-grid" id="cal-grid"></div>
+      <div class="cal-legend">
+        <div class="leg-item"><div class="leg-dot" style="background:var(--green-bg);border-color:var(--green)"></div> Has Booking</div>
+        <div class="leg-item"><div class="leg-dot" style="background:var(--blue-bg);border-color:var(--blue)"></div> Today</div>
+        <div class="leg-item"><div class="leg-dot" style="background:#fafafa;"></div> Free</div>
+        <div class="leg-item"><div class="leg-dot" style="background:var(--navy);"></div> Selected</div>
+      </div>
+    </div>
+    <div>
+      <div class="sidebar-panel" id="cal-detail">
+        <div class="sidebar-title" id="cal-detail-title">Select a date</div>
+        <div id="cal-detail-body"><p style="color:var(--text3);font-size:13px">Click a date to see bookings</p></div>
+      </div>
+      <div class="sidebar-panel">
+        <div class="sidebar-title">Upcoming Bookings</div>
+        <div id="upcoming-list"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── BOOKINGS PAGE ── -->
+<div class="page" id="page-bookings">
+  <div class="page-header">
+    <div>
+      <div class="page-title">Booking Management</div>
+      <div class="page-sub">Track and manage all hall bookings</div>
+    </div>
+    <button class="btn-primary" onclick="openBookingModal()">＋ New Booking</button>
+  </div>
+  <div class="booking-cols">
+    <div class="booking-col">
+      <div class="col-header">
+        <div class="col-title">All Visitors</div>
+        <span class="col-count" style="background:var(--blue-bg);color:var(--blue)" id="bk-cnt-all">0</span>
+      </div>
+      <div id="bk-col-all"></div>
+    </div>
+    <div class="booking-col">
+      <div class="col-header">
+        <div class="col-title">Pending / Follow Up</div>
+        <span class="col-count" style="background:var(--amber-bg);color:var(--amber)" id="bk-cnt-pending">0</span>
+      </div>
+      <div id="bk-col-pending"></div>
+    </div>
+    <div class="booking-col">
+      <div class="col-header">
+        <div class="col-title">Confirmed Bookings</div>
+        <span class="col-count" style="background:var(--green-bg);color:var(--green)" id="bk-cnt-confirmed">0</span>
+      </div>
+      <div id="bk-col-confirmed"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ── FUNDS PAGE ── -->
+<div class="page" id="page-funds">
+  <div class="page-header">
+    <div>
+      <div class="page-title">Funds & Finance</div>
+      <div class="page-sub">Revenue, expenses and profitability overview</div>
+    </div>
+  </div>
+  <div class="funds-grid">
+    <div class="fund-card" style="background:var(--green-bg);color:var(--green)">
+      <div class="fund-label">Total Revenue</div>
+      <div class="fund-val" id="f-revenue">₹0</div>
+    </div>
+    <div class="fund-card" style="background:var(--red-bg);color:var(--red)">
+      <div class="fund-label">Total Expenses</div>
+      <div class="fund-val" id="f-expenses">₹0</div>
+    </div>
+    <div class="fund-card" id="f-profit-card" style="background:var(--green-bg);color:var(--green)">
+      <div class="fund-label">Net Profit</div>
+      <div class="fund-val" id="f-profit">₹0</div>
+    </div>
+    <div class="fund-card" style="background:var(--blue-bg);color:var(--blue)">
+      <div class="fund-label">Avg. Deal Value</div>
+      <div class="fund-val" id="f-avg">₹0</div>
+    </div>
+  </div>
+  <div class="funds-panels">
+    <div class="funds-panel">
+      <div class="funds-panel-title">Revenue from Bookings</div>
+      <div id="revenue-list"></div>
+    </div>
+    <div class="funds-panel">
+      <div class="funds-panel-title">
+        Expenses
+        <button class="btn-add-exp" onclick="toggleExpForm()">＋ Add</button>
+      </div>
+      <div id="expense-list"></div>
+      <div class="add-exp-row" id="exp-form" style="display:none">
+        <input type="text" id="exp-label" placeholder="Description" />
+        <input type="number" id="exp-amount" placeholder="₹ Amount" style="max-width:120px" />
+        <button class="add-exp-btn" onclick="addExpense()">✓</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── LEAD MODAL ── -->
+<div class="modal-overlay" id="lead-modal">
+  <div class="modal">
+    <div class="modal-title" id="lead-modal-title">Add New Lead</div>
+    <input type="hidden" id="lead-edit-id" value="" />
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Full Name *</label>
+        <input class="form-input" id="f-name" type="text" placeholder="Client name" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Phone Number *</label>
+        <input class="form-input" id="f-phone" type="tel" placeholder="10-digit number" />
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Location</label>
+        <input class="form-input" id="f-location" type="text" placeholder="City / Area" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Event Type</label>
+        <input class="form-input" id="f-event" type="text" placeholder="Wedding, Corporate…" />
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Booking Date</label>
+        <input class="form-input" id="f-date" type="date" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Time</label>
+        <input class="form-input" id="f-time" type="time" />
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Advance Amount (₹)</label>
+      <input class="form-input" id="f-amount" type="number" placeholder="0" />
+    </div>
+    <div class="form-group">
+      <label class="form-label">Status</label>
+      <div class="status-select">
+        <button class="status-btn sel-followup" id="sb-accepted" onclick="selectStatus('accepted')">✓ Accepted</button>
+        <button class="status-btn" id="sb-followup" onclick="selectStatus('followup')">↩ Follow Up</button>
+        <button class="status-btn" id="sb-rejected" onclick="selectStatus('rejected')">✕ Rejected</button>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Notes</label>
+      <textarea class="form-input" id="f-notes" rows="2" placeholder="Any additional notes…" style="resize:vertical"></textarea>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="closeLeadModal()">Cancel</button>
+      <button class="btn-save" onclick="saveLead()">Save Lead</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ─── DATA ─────────────────────────────────────────────────
+let leads = [
+  { id: 1, name: "Rahul Sharma", phone: "9876543210", location: "Hyderabad", bookingDate: "2026-06-15", time: "10:00", status: "accepted", event: "Wedding Reception", amount: 85000, notes: "500 guests" },
+  { id: 2, name: "Priya Reddy", phone: "9988776655", location: "Warangal", bookingDate: "2026-06-20", time: "14:00", status: "followup", event: "Corporate Event", amount: 45000, notes: "Call back Monday" },
+  { id: 3, name: "Suresh Kumar", phone: "9123456789", location: "Karimnagar", bookingDate: "2026-06-22", time: "11:00", status: "rejected", event: "Birthday Party", amount: 0, notes: "Budget too low" },
+  { id: 4, name: "Anitha Devi", phone: "9654321098", location: "Nizamabad", bookingDate: "2026-07-05", time: "16:00", status: "accepted", event: "Engagement", amount: 62000, notes: "200 guests" },
+  { id: 5, name: "Mohan Rao", phone: "9871234560", location: "Koratla", bookingDate: "2026-07-10", time: "09:00", status: "followup", event: "Anniversary", amount: 35000, notes: "Needs catering quote" },
+];
+let expenses = [
+  { id: 1, label: "Hall Maintenance", amount: 15000, date: "2026-05-01" },
+  { id: 2, label: "Staff Salaries", amount: 45000, date: "2026-05-05" },
+  { id: 3, label: "Electricity Bill", amount: 8500, date: "2026-05-08" },
+];
+
+let currentFilter = 'all';
+let currentStatus = 'followup';
+let calYear, calMonth, calSelected = null;
+
+const MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+const MONTHS_SHORT = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+
+// ─── TABS ─────────────────────────────────────────────────
+function switchTab(tab) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('page-' + tab).classList.add('active');
+  document.getElementById('tab-' + tab).classList.add('active');
+  if (tab === 'calendar') renderCalendar();
+  if (tab === 'bookings') renderBookings();
+  if (tab === 'funds') renderFunds();
+}
+
+// ─── TOPBAR STATS ─────────────────────────────────────────
+function updateTopbar() {
+  const confirmed = leads.filter(l => l.status === 'accepted').length;
+  const followup = leads.filter(l => l.status === 'followup').length;
+  const revenue = leads.filter(l => l.status === 'accepted').reduce((s,l) => s + (l.amount||0), 0);
+  document.getElementById('top-confirmed').textContent = confirmed;
+  document.getElementById('top-followup').textContent = followup;
+  document.getElementById('top-revenue').textContent = '₹' + (revenue >= 1000 ? (revenue/1000).toFixed(0) + 'k' : revenue);
+}
+
+// ─── LEADS ────────────────────────────────────────────────
+function filterLeads(filter) {
+  currentFilter = filter;
+  renderLeads();
+  // highlight active card
+  ['all','accepted','followup','rejected'].forEach(f => {
+    document.getElementById('sc-' + f).classList.toggle('active-filter', f === filter);
+  });
+}
+
+function renderLeads() {
+  const counts = { all: leads.length, accepted: 0, followup: 0, rejected: 0 };
+  leads.forEach(l => counts[l.status]++);
+  document.getElementById('cnt-all').textContent = counts.all;
+  document.getElementById('cnt-accepted').textContent = counts.accepted;
+  document.getElementById('cnt-followup').textContent = counts.followup;
+  document.getElementById('cnt-rejected').textContent = counts.rejected;
+
+  const filtered = currentFilter === 'all' ? leads : leads.filter(l => l.status === currentFilter);
+  const container = document.getElementById('leads-list');
+
+  if (filtered.length === 0) {
+    container.innerHTML = `<div class="empty-state">No leads in this category</div>`;
+    return;
+  }
+
+  container.innerHTML = filtered.map(lead => {
+    const otherStatuses = ['accepted','followup','rejected'].filter(s => s !== lead.status);
+    const actionBtns = otherStatuses.map(s => {
+      const labels = { accepted: '✓ Accept', followup: '↩ Follow Up', rejected: '✕ Reject' };
+      const cls = { accepted: 'btn-accept', followup: 'btn-followup', rejected: 'btn-reject' };
+      return `<button class="action-btn ${cls[s]}" onclick="updateLeadStatus(${lead.id},'${s}')">${labels[s]}</button>`;
+    }).join('');
+    return `
+    <div class="lead-card">
+      <div class="lead-avatar">${lead.name.charAt(0)}</div>
+      <div class="lead-info">
+        <div class="lead-name">
+          ${lead.name}
+          <span class="badge badge-${lead.status}">${{accepted:'Accepted',followup:'Follow Up',rejected:'Rejected'}[lead.status]}</span>
+        </div>
+        <div class="lead-meta">
+          <span>📞 ${lead.phone}</span>
+          <span>📍 ${lead.location || '—'}</span>
+          <span>📅 ${lead.bookingDate || '—'}${lead.time ? ' @ ' + lead.time : ''}</span>
+          ${lead.event ? `<span>🎉 ${lead.event}</span>` : ''}
+          ${lead.amount ? `<span>💳 ₹${Number(lead.amount).toLocaleString()}</span>` : ''}
+        </div>
+        ${lead.notes ? `<div class="lead-notes">${lead.notes}</div>` : ''}
+      </div>
+      <div class="lead-actions">
+        ${actionBtns}
+        <button class="action-btn edit" onclick="openLeadModal(${lead.id})">✏️ Edit</button>
+      </div>
+    </div>`;
+  }).join('');
+  updateTopbar();
+}
+
+function updateLeadStatus(id, status) {
+  const lead = leads.find(l => l.id === id);
+  if (lead) { lead.status = status; renderLeads(); }
+}
+
+// ─── LEAD MODAL ───────────────────────────────────────────
+function openLeadModal(id) {
+  currentStatus = 'followup';
+  document.getElementById('lead-edit-id').value = '';
+  ['name','phone','location','event','date','time','amount','notes'].forEach(f => {
+    document.getElementById('f-'+f).value = '';
+  });
+  document.getElementById('lead-modal-title').textContent = 'Add New Lead';
+
+  if (id) {
+    const lead = leads.find(l => l.id === id);
+    if (lead) {
+      document.getElementById('lead-edit-id').value = id;
+      document.getElementById('lead-modal-title').textContent = 'Edit Lead';
+      document.getElementById('f-name').value = lead.name || '';
+      document.getElementById('f-phone').value = lead.phone || '';
+      document.getElementById('f-location').value = lead.location || '';
+      document.getElementById('f-event').value = lead.event || '';
+      document.getElementById('f-date').value = lead.bookingDate || '';
+      document.getElementById('f-time').value = lead.time || '';
+      document.getElementById('f-amount').value = lead.amount || '';
+      document.getElementById('f-notes').value = lead.notes || '';
+      currentStatus = lead.status;
+    }
+  }
+  updateStatusButtons();
+  document.getElementById('lead-modal').classList.add('open');
+}
+
+function closeLeadModal() {
+  document.getElementById('lead-modal').classList.remove('open');
+}
+
+function selectStatus(s) {
+  currentStatus = s;
+  updateStatusButtons();
+}
+
+function updateStatusButtons() {
+  ['accepted','followup','rejected'].forEach(s => {
+    const btn = document.getElementById('sb-' + s);
+    btn.className = 'status-btn' + (currentStatus === s ? ' sel-' + s : '');
+  });
+}
+
+function saveLead() {
+  const name = document.getElementById('f-name').value.trim();
+  const phone = document.getElementById('f-phone').value.trim();
+  if (!name || !phone) { alert('Name and phone are required'); return; }
+  const editId = document.getElementById('lead-edit-id').value;
+  const data = {
+    name, phone,
+    location: document.getElementById('f-location').value.trim(),
+    event: document.getElementById('f-event').value.trim(),
+    bookingDate: document.getElementById('f-date').value,
+    time: document.getElementById('f-time').value,
+    amount: Number(document.getElementById('f-amount').value) || 0,
+    notes: document.getElementById('f-notes').value.trim(),
+    status: currentStatus,
+  };
+  if (editId) {
+    const idx = leads.findIndex(l => l.id == editId);
+    if (idx !== -1) leads[idx] = { ...leads[idx], ...data };
+  } else {
+    leads.push({ ...data, id: Date.now() });
+  }
+  closeLeadModal();
+  renderLeads();
+  "ssss";
+}
+
+document.getElementById('lead-modal').addEventListener('click', function(e) {
+  if (e.target === this) closeLeadModal();
+});
+
+// ─── CALENDAR ─────────────────────────────────────────────
+function initCalendar() {
+  const now = new Date();
+  calYear = now.getFullYear();
+  calMonth = now.getMonth();
+}
+
+function bookingsByDate() {
+  const map = {};
+  leads.filter(l => l.status === 'accepted' && l.bookingDate).forEach(l => {
+    if (!map[l.bookingDate]) map[l.bookingDate] = [];
+    map[l.bookingDate].push(l);
+  });
+  return map;
+}
+
+function renderCalendar() {
+  document.getElementById('cal-month-label').textContent = MONTHS[calMonth] + ' ' + calYear;
+  const grid = document.getElementById('cal-grid');
+  const firstDay = new Date(calYear, calMonth, 1).getDay();
+  const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
+  const today = new Date();
+  const todayStr = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
+  const bmap = bookingsByDate();
+
+  let html = '';
+  for (let i = 0; i < firstDay; i++) html += '<div class="cal-cell empty"></div>';
+  for (let d = 1; d <= daysInMonth; d++) {
+    const dateStr = `${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const bks = bmap[dateStr] || [];
+    const isToday = dateStr === todayStr;
+    const isSel = calSelected === dateStr;
+    let cls = 'cal-cell';
+    if (isToday) cls += ' today';
+    if (bks.length) cls += ' booked';
+    if (isSel) cls += ' selected';
+    html += `<div class="${cls}" onclick="selectCalDay('${dateStr}', ${d})">
+      <span class="day-num">${d}</span>
+      ${bks.length ? `<span class="day-bk">${bks.length} bk</span>` : ''}
+    </div>`;
+  }
+  grid.innerHTML = html;
+  renderUpcoming();
+  if (calSelected) renderCalDetail(calSelected);
+}
+
+function selectCalDay(dateStr, d) {
+  calSelected = dateStr;
+  renderCalendar();
+  renderCalDetail(dateStr);
+}
+
+function renderCalDetail(dateStr) {
+  const bmap = bookingsByDate();
+  const bks = bmap[dateStr] || [];
+  const parts = dateStr.split('-');
+  const label = `${parts[2]} ${MONTHS_SHORT[parseInt(parts[1])-1]} ${parts[0]}`;
+  document.getElementById('cal-detail-title').textContent = label;
+  if (bks.length === 0) {
+    document.getElementById('cal-detail-body').innerHTML = `<p style="color:var(--green);font-size:13px;font-weight:600">🟢 Hall is free on this day!</p>`;
+  } else {
+    document.getElementById('cal-detail-body').innerHTML = bks.map(b => `
+      <div class="day-booking-card">
+        <div class="day-booking-name">${b.name}</div>
+        <div class="day-booking-meta">${b.event || 'Event'}</div>
+        <div class="day-booking-meta">⏰ ${b.time || 'TBD'} &nbsp;·&nbsp; 📞 ${b.phone}</div>
+      </div>`).join('');
+  }
+}
+
+function renderUpcoming() {
+  const accepted = leads.filter(l => l.status === 'accepted' && l.bookingDate)
+    .sort((a,b) => a.bookingDate > b.bookingDate ? 1 : -1).slice(0,5);
+  if (accepted.length === 0) {
+    document.getElementById('upcoming-list').innerHTML = `<p style="color:var(--text3);font-size:13px">No upcoming bookings</p>`;
+    return;
+  }
+  document.getElementById('upcoming-list').innerHTML = accepted.map(b => {
+    const parts = b.bookingDate.split('-');
+    return `<div class="upcoming-item">
+      <div class="date-badge">
+        <div class="db-day">${parts[2]}</div>
+        <div class="db-mon">${MONTHS_SHORT[parseInt(parts[1])-1]}</div>
+      </div>
+      <div>
+        <div class="upcoming-name">${b.name}</div>
+        <div class="upcoming-meta">${b.time || '—'} · ${b.event || 'Event'}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function calPrev() {
+  if (calMonth === 0) { calMonth = 11; calYear--; }
+  else calMonth--;
+  renderCalendar();
+}
+function calNext() {
+  if (calMonth === 11) { calMonth = 0; calYear++; }
+  else calMonth++;
+  renderCalendar();
+}
+
+// ─── BOOKINGS ──────────────────────────────────────────────
+function openBookingModal() { openLeadModal(); }
+
+function renderBookings() {
+  const allLeads = leads;
+  const pending = leads.filter(l => l.status === 'followup');
+  const confirmed = leads.filter(l => l.status === 'accepted');
+
+  document.getElementById('bk-cnt-all').textContent = allLeads.length;
+  document.getElementById('bk-cnt-pending').textContent = pending.length;
+  document.getElementById('bk-cnt-confirmed').textContent = confirmed.length;
+
+  function bkCard(lead) {
+    const otherStatuses = ['accepted','followup','rejected'].filter(s => s !== lead.status);
+    const labels = { accepted: '✓ Accept', followup: '↩ Follow Up', rejected: '✕ Reject' };
+    const cls = { accepted: 'btn-accept', followup: 'btn-followup', rejected: 'btn-reject' };
+    const btns = otherStatuses.map(s =>
+      `<button class="bk-btn ${cls[s]}" onclick="updateLeadStatus(${lead.id},'${s}');renderBookings()">${labels[s]}</button>`
+    ).join('');
+    return `<div class="bk-card">
+      <div class="bk-name">${lead.name}</div>
+      <div class="bk-meta">📍 ${lead.location||'—'} &nbsp;·&nbsp; 🎉 ${lead.event||'—'}</div>
+      <div class="bk-meta">📅 ${lead.bookingDate||'—'} ${lead.time ? '@ ' + lead.time : ''}</div>
+      <div class="bk-meta">📞 ${lead.phone}</div>
+      ${lead.amount > 0 ? `<div class="bk-amount">₹${Number(lead.amount).toLocaleString()}</div>` : ''}
+      <div class="bk-actions">${btns}</div>
+    </div>`;
+  }
+
+  const empty = `<div class="empty-state" style="padding:24px">No entries</div>`;
+  document.getElementById('bk-col-all').innerHTML = allLeads.length ? allLeads.map(bkCard).join('') : empty;
+  document.getElementById('bk-col-pending').innerHTML = pending.length ? pending.map(bkCard).join('') : empty;
+  document.getElementById('bk-col-confirmed').innerHTML = confirmed.length ? confirmed.map(bkCard).join('') : empty;
+}
+
+// ─── FUNDS ─────────────────────────────────────────────────
+function toggleExpForm() {
+  const f = document.getElementById('exp-form');
+  f.style.display = f.style.display === 'none' ? 'flex' : 'none';
+}
+
+function addExpense() {
+  const label = document.getElementById('exp-label').value.trim();
+  const amount = Number(document.getElementById('exp-amount').value);
+  if (!label || !amount) return;
+  const today = new Date().toISOString().split('T')[0];
+  expenses.push({ id: Date.now(), label, amount, date: today });
+  document.getElementById('exp-label').value = '';
+  document.getElementById('exp-amount').value = '';
+  document.getElementById('exp-form').style.display = 'none';
+  renderFunds();
+}
+
+function renderFunds() {
+  const accepted = leads.filter(l => l.status === 'accepted');
+  const totalRevenue = accepted.reduce((s,l) => s + (l.amount||0), 0);
+  const totalExpense = expenses.reduce((s,e) => s + e.amount, 0);
+  const netProfit = totalRevenue - totalExpense;
+  const avg = accepted.length ? Math.round(totalRevenue / accepted.length) : 0;
+
+  document.getElementById('f-revenue').textContent = '₹' + totalRevenue.toLocaleString();
+  document.getElementById('f-expenses').textContent = '₹' + totalExpense.toLocaleString();
+  document.getElementById('f-profit').textContent = '₹' + Math.abs(netProfit).toLocaleString();
+  document.getElementById('f-avg').textContent = '₹' + avg.toLocaleString();
+
+  const pc = document.getElementById('f-profit-card');
+  if (netProfit >= 0) { pc.style.background = 'var(--green-bg)'; pc.style.color = 'var(--green)'; }
+  else { pc.style.background = 'var(--red-bg)'; pc.style.color = 'var(--red)'; }
+
+  const revList = document.getElementById('revenue-list');
+  const revItems = accepted.filter(l => l.amount > 0);
+  revList.innerHTML = revItems.length ? revItems.map(l => `
+    <div class="rev-item">
+      <div><div class="rev-name">${l.name}</div><div class="rev-event">${l.event||'Event'} · ${l.bookingDate||'—'}</div></div>
+      <div class="rev-amount">+₹${Number(l.amount).toLocaleString()}</div>
+    </div>`).join('') + `<div style="padding:12px 0;display:flex;justify-content:space-between;font-weight:700;font-size:14px;color:var(--navy)"><span>Total</span><span style="color:var(--green)">₹${totalRevenue.toLocaleString()}</span></div>`
+    : `<p style="color:var(--text3);font-size:13px">No revenue recorded yet</p>`;
+
+  const expList = document.getElementById('expense-list');
+  expList.innerHTML = expenses.length ? expenses.map(e => `
+    <div class="rev-item">
+      <div><div class="rev-name">${e.label}</div><div class="rev-event">${e.date}</div></div>
+      <div class="rev-amount exp-amount">-₹${Number(e.amount).toLocaleString()}</div>
+    </div>`).join('') + `<div style="padding:12px 0;display:flex;justify-content:space-between;font-weight:700;font-size:14px;color:var(--navy)"><span>Total</span><span style="color:var(--red)">₹${totalExpense.toLocaleString()}</span></div>`
+    : `<p style="color:var(--text3);font-size:13px">No expenses recorded yet</p>`;
+}
+
+// ─── INIT ──────────────────────────────────────────────────
+initCalendar();
+filterLeads('all');
+updateTopbar();
+</script>
+</body>
+</html>
