@@ -665,12 +665,35 @@ function showSection(sectionId){
 }
 
 function openModal(){
-    document.getElementById('leadModal').style.display='flex';
+
+if(!editId){
+    clearForm();
+}
+
+document.getElementById('leadModal').style.display='flex';
 }
 
 function closeModal(){
     document.getElementById('leadModal').style.display='none';
     
+}
+function clearForm(){
+
+document.getElementById('name').value='';
+document.getElementById('phone').value='';
+document.getElementById('location').value='';
+document.getElementById('event').value='';
+document.getElementById('date').value='';
+document.getElementById('time').value='';
+document.getElementById('advance').value='';
+document.getElementById('bookingAmount').value='';
+document.getElementById('due').value='';
+document.getElementById('fullPayment').value='';
+document.getElementById('maintenance').value='';
+document.getElementById('status').value='accepted';
+document.getElementById('notes').value='';
+
+editId = null;
 }
 function showAcceptedBookings(){
 
