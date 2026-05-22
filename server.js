@@ -23,7 +23,15 @@ const LeadSchema = new mongoose.Schema({
     time:String,
     status:String,
     event:String,
-    amount:Number,
+    advance:Number,
+    bookingAmount:Number,
+    due:Number,
+    fullPayment:Number,
+    maintenance:Number,advance:Number,
+    bookingAmount:Number,
+    due:Number,
+    fullPayment:Number,
+    maintenance:Number,
     notes:String
 
 });

@@ -177,6 +177,8 @@ input,select,textarea{
     padding:20px;
     border-radius:18px;
     border:1px solid #334155;
+    overflow-wrap:break-word;
+    word-wrap:break-word;
 }
 
 .lead-card h2{
@@ -258,6 +260,9 @@ input,select,textarea{
     background:#111827;
     padding:30px;
     border-radius:24px;
+    max-height:90vh;
+    overflow-y:auto;
+    overflow-x:hidden;
 }
 
 .close{
@@ -385,9 +390,11 @@ body{
 
 .modal-content{
     width:95%;
+    max-width:95%;
     padding:20px;
     max-height:90vh;
     overflow-y:auto;
+    overflow-x:hidden;
 }
 
 .actions{
@@ -445,9 +452,14 @@ textarea{
                 <h1 class="blue" id="totalLeads">0</h1>
             </div>
 
-            <div class="card">
+            <div class="card" onclick="showAcceptedBookings()" style="cursor:pointer">
                 <h3>Confirmed Bookings</h3>
                 <h1 class="yellow" id="confirmedBookings">0</h1>
+            </div>
+
+            <div class="card" onclick="showFollowUps()" style="cursor:pointer">
+                <h3>Follow Ups</h3>
+                <h1 class="blue" id="followUpCount">0</h1>
             </div>
 
             <div class="card">
@@ -498,7 +510,9 @@ textarea{
                         <th>Name</th>
                         <th>Event</th>
                         <th>Date</th>
-                        <th>Amount</th>
+                        <th>Advance</th>
+                        <th>Booking</th>
+                        <th>Due</th>
                         <th>Status</th>
                     </tr>
                 </thead>
@@ -583,8 +597,15 @@ textarea{
         <input type="text" id="event" placeholder="Event Type">
         <input type="date" id="date">
         <input type="time" id="time">
-        <input type="number" id="amount" placeholder="Advance Amount">
+        <input type="number" id="advance" placeholder="Advance Amount">
 
+        <input type="number" id="bookingAmount" placeholder="Total Booking Amount">
+        
+        <input type="number" id="due" placeholder="Due Amount">
+        
+        <input type="number" id="fullPayment" placeholder="Full Payment">
+        
+        <input type="number" id="maintenance" placeholder="Maintenance Charges">
         <select id="status">
             <option value="accepted">Accepted</option>
             <option value="followup">Follow Up</option>
@@ -631,6 +652,117 @@ function openModal(){
 
 function closeModal(){
     document.getElementById('leadModal').style.display='none';
+    
+}
+function showAcceptedBookings(){
+
+const container=document.getElementById('acceptedContainer');
+
+const accepted=leads.filter(
+    lead=>lead.status==='accepted'
+);
+
+container.innerHTML='';
+
+if(accepted.length===0){
+
+    container.innerHTML='<p>No accepted bookings found</p>';
+
+}else{
+
+    accepted.forEach(lead=>{
+
+        container.innerHTML += `
+
+        <div class="lead-card" style="margin-bottom:15px">
+
+            <h2>${lead.name}</h2>
+
+            <p>📞 ${lead.phone}</p>
+
+            <p>📍 ${lead.location}</p>
+
+            <p>🎉 ${lead.event}</p>
+
+            <p>📅 ${lead.bookingDate}</p>
+
+            <p>💵 Advance: ₹${lead.advance || 0}</p>
+
+            <p>📦 Booking: ₹${lead.bookingAmount || 0}</p>
+
+            <p>⏳ Due: ₹${lead.due || 0}</p>
+
+            <p>✅ Full Payment: ₹${lead.fullPayment || 0}</p>
+
+            <p>🛠 Maintenance: ₹${lead.maintenance || 0}</p>
+
+            <p>📝 Notes: ${lead.notes || 'No notes'}</p>
+
+        </div>
+
+        `;
+    });
+}
+
+document.getElementById('acceptedModal').style.display='flex';
+}
+
+function closeAcceptedBookings(){
+
+document.getElementById('acceptedModal').style.display='none';
+}
+function showFollowUps(){
+
+const container=document.getElementById('followUpContainer');
+
+const followUps=leads.filter(
+    lead=>lead.status==='followup'
+);
+
+container.innerHTML='';
+
+if(followUps.length===0){
+
+    container.innerHTML='<p>No follow ups found</p>';
+
+}else{
+
+    followUps.forEach(lead=>{
+
+        container.innerHTML += `
+
+        <div class="lead-card" style="margin-bottom:15px">
+
+            <h2>${lead.name}</h2>
+
+            <p>📞 ${lead.phone}</p>
+
+            <p>📍 ${lead.location}</p>
+
+            <p>🎉 ${lead.event}</p>
+
+            <p>📅 ${lead.bookingDate}</p>
+
+            <p>💵 Advance: ₹${lead.advance || 0}</p>
+
+            <p>📦 Booking: ₹${lead.bookingAmount || 0}</p>
+
+            <p>⏳ Due: ₹${lead.due || 0}</p>
+
+            <p>📝 Notes: ${lead.notes || 'No notes'}</p>
+
+        </div>
+
+        `;
+    });
+}
+
+document.getElementById('followUpModal').style.display='flex';
+}
+
+function closeFollowUps(){
+
+document.getElementById('followUpModal').style.display='none';
 }
 
 function showNotification(message){
@@ -681,8 +813,16 @@ function renderLeads(){
             <p>📍 ${lead.location}</p>
             <p>🎉 ${lead.event}</p>
             <p>📅 ${lead.bookingDate}</p>
-            <p>💰 ₹${lead.amount}</p>
+            
+            <p>💵 Advance: ₹${lead.advance || 0}</p>
 
+            <p>📦 Booking: ₹${lead.bookingAmount || 0}</p>
+
+            <p>⏳ Due: ₹${lead.due || 0}</p>
+
+            <p>✅ Full Payment: ₹${lead.fullPayment || 0}</p>
+
+            <p>🛠 Maintenance: ₹${lead.maintenance || 0}</p>
             <span class="badge ${lead.status}">
                 ${lead.status}
             </span>
@@ -719,7 +859,11 @@ function renderBookings(){
             <td>${lead.name}</td>
             <td>${lead.event}</td>
             <td>${lead.bookingDate}</td>
-            <td>₹${lead.amount}</td>
+            <td>₹${lead.advance || 0}</td>
+
+            <td>₹${lead.bookingAmount || 0}</td>
+
+            <td>₹${lead.due || 0}</td>
             <td>${lead.status}</td>
         </tr>
 
@@ -731,9 +875,10 @@ function updateDashboard(){
 
     const revenue = leads
     .filter(lead=>lead.status==='accepted')
-    .reduce((sum,lead)=>sum+Number(lead.amount||0),0);
+    .reduce((sum,lead)=>sum+Number(lead.bookingAmount||0),0);
 
     const confirmed = leads.filter(lead=>lead.status==='accepted').length;
+    const followUps = leads.filter(lead=>lead.status==='followup').length;
 
     const expenseTotal = expenses.reduce((sum,expense)=>sum+expense.amount,0);
 
@@ -742,6 +887,7 @@ function updateDashboard(){
     document.getElementById('totalLeads').innerText=leads.length;
 
     document.getElementById('confirmedBookings').innerText=confirmed;
+    document.getElementById('followUpCount').innerText=followUps;
 
     document.getElementById('totalExpenses').innerText=`₹${expenseTotal.toLocaleString()}`;
 
@@ -752,7 +898,7 @@ function renderAnalytics(){
 
     const accepted=leads.filter(l=>l.status==='accepted');
 
-    const revenue=accepted.reduce((sum,l)=>sum+Number(l.amount||0),0);
+    const revenue=accepted.reduce((sum,l)=>sum+Number(l.bookingAmount||0),0);
 
     const avg=accepted.length?Math.round(revenue/accepted.length):0;
 
@@ -809,7 +955,15 @@ async function saveLead(){
         event:document.getElementById('event').value,
         bookingDate:document.getElementById('date').value,
         time:document.getElementById('time').value,
-        amount:document.getElementById('amount').value,
+        advance:document.getElementById('advance').value,
+
+        bookingAmount:document.getElementById('bookingAmount').value,
+
+        due:document.getElementById('due').value,
+
+        fullPayment:document.getElementById('fullPayment').value,
+
+        maintenance:document.getElementById('maintenance').value,
         status:document.getElementById('status').value,
         notes:document.getElementById('notes').value
     };
@@ -869,7 +1023,15 @@ function editLead(id){
     document.getElementById('event').value=lead.event;
     document.getElementById('date').value=lead.bookingDate;
     document.getElementById('time').value=lead.time;
-    document.getElementById('amount').value=lead.amount;
+    document.getElementById('advance').value=lead.advance;
+
+    document.getElementById('bookingAmount').value=lead.bookingAmount;
+
+    document.getElementById('due').value=lead.due;
+
+    document.getElementById('fullPayment').value=lead.fullPayment;
+
+    document.getElementById('maintenance').value=lead.maintenance;      
     document.getElementById('status').value=lead.status;
     document.getElementById('notes').value=lead.notes;
 }
@@ -930,6 +1092,32 @@ loadLeads();
 renderExpenses();
 
 </script>
+<div class="modal" id="followUpModal">
 
+    <div class="modal-content">
+
+        <span class="close" onclick="closeFollowUps()">×</span>
+
+        <h1 style="margin-bottom:20px">Follow Up Leads</h1>
+
+        <div id="followUpContainer"></div>
+
+    </div>
+
+
+</div>
+<div class="modal" id="acceptedModal">
+
+    <div class="modal-content">
+
+        <span class="close" onclick="closeAcceptedBookings()">×</span>
+
+        <h1 style="margin-bottom:20px">Accepted Bookings</h1>
+
+        <div id="acceptedContainer"></div>
+
+    </div>
+
+</div>
 </body>
 </html>
