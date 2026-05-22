@@ -431,6 +431,7 @@ textarea{
         <button onclick="showSection('bookings')">Bookings</button>
         <button onclick="showSection('finance')">Finance</button>
         <button onclick="showSection('analytics')">Analytics</button>
+        <button onclick="showSection('calendar')">Calendar</button>
     </div>
 </div>
 
@@ -583,6 +584,19 @@ textarea{
         </div>
 
     </div>
+    <div id="calendar" class="section">
+
+        <div class="panel">
+    
+            <div class="panel-header">
+                <div class="panel-title">Event Calendar</div>
+            </div>
+    
+            <div id="calendarView"></div>
+    
+        </div>
+    
+    </div>
 
 </div>
 
@@ -701,9 +715,6 @@ if(accepted.length===0){
             <p>🛠 Maintenance: ₹${lead.maintenance || 0}</p>
 
             <p>📝 Notes: ${lead.notes || 'No notes'}</p>
-
-
-        </div>
         <div class="actions">
 
             <button class="btn edit" onclick="editLead('${lead._id}')">
@@ -711,6 +722,9 @@ if(accepted.length===0){
             </button>
 
         </div>
+
+        </div>
+
 
         `;
     });
@@ -762,15 +776,16 @@ if(followUps.length===0){
             <p>⏳ Due: ₹${lead.due || 0}</p>
 
             <p>📝 Notes: ${lead.notes || 'No notes'}</p>
-
-        </div>
-        <div class="actions">
+            <div class="actions">
 
             <button class="btn edit" onclick="editLead('${lead._id}')">
                 Edit
             </button>
 
         </div>
+
+        </div>
+
 
         `;
     });
@@ -808,7 +823,7 @@ async function loadLeads(){
         renderBookings();
         updateDashboard();
         renderAnalytics();
-
+        renderCalendar();
     }catch(err){
         console.log(err);
     }
@@ -935,6 +950,7 @@ function renderAnalytics(){
 }
 
 let chart;
+let calendar;
 
 function renderChart(revenue,expense){
 
@@ -962,6 +978,46 @@ function renderChart(revenue,expense){
             }]
         }
     });
+}
+function renderCalendar(){
+
+const calendarEl=document.getElementById('calendarView');
+
+if(calendar){
+    calendar.destroy();
+}
+
+const events=leads.map(lead=>({
+
+    title:`${lead.event} - ${lead.name}`,
+
+    start:lead.bookingDate,
+
+    color:
+        lead.status==='accepted'
+        ? '#22c55e'
+        : lead.status==='followup'
+        ? '#facc15'
+        : '#ef4444'
+}));
+
+calendar=new FullCalendar.Calendar(calendarEl,{
+
+    initialView:'dayGridMonth',
+
+    height:'auto',
+
+    events:events,
+
+    eventClick:function(info){
+
+        alert(
+            `Event: ${info.event.title}\nDate: ${info.event.startStr}`
+        );
+    }
+});
+
+calendar.render();
 }
 
 async function saveLead(){
@@ -1007,8 +1063,14 @@ async function saveLead(){
         });
 
         closeModal();
+
+        showNotification(
+            editId
+            ? 'Lead Updated Successfully'
+            : 'Lead Added Successfully'
+        );
+
         editId = null;
-        showNotification('Lead Added Successfully');
 
         loadLeads();
 
