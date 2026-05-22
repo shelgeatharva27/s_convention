@@ -5,6 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Premium Convention Management</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.css" rel="stylesheet">
+
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -630,6 +633,7 @@ const API = "";
 
 let leads = [];
 let expenses = [];
+let editId = null;
 
 function showSection(sectionId){
 
@@ -698,6 +702,14 @@ if(accepted.length===0){
 
             <p>📝 Notes: ${lead.notes || 'No notes'}</p>
 
+
+        </div>
+        <div class="actions">
+
+            <button class="btn edit" onclick="editLead('${lead._id}')">
+                Edit
+            </button>
+
         </div>
 
         `;
@@ -750,6 +762,13 @@ if(followUps.length===0){
             <p>⏳ Due: ₹${lead.due || 0}</p>
 
             <p>📝 Notes: ${lead.notes || 'No notes'}</p>
+
+        </div>
+        <div class="actions">
+
+            <button class="btn edit" onclick="editLead('${lead._id}')">
+                Edit
+            </button>
 
         </div>
 
@@ -970,9 +989,15 @@ async function saveLead(){
 
     try{
 
-        await fetch(`${API}/addLead`,{
+        const url = editId
+            ? `${API}/updateLead/${editId}`
+            : `${API}/addLead`;
 
-            method:'POST',
+        const method = editId ? 'PUT' : 'POST';
+
+        await fetch(url,{
+
+            method:method,
 
             headers:{
                 'Content-Type':'application/json'
@@ -982,7 +1007,7 @@ async function saveLead(){
         });
 
         closeModal();
-
+        editId = null;
         showNotification('Lead Added Successfully');
 
         loadLeads();
@@ -1010,7 +1035,9 @@ async function deleteLead(id){
 }
 
 function editLead(id){
-
+    closeFollowUps();
+    closeAcceptedBookings();
+    editId = id;
     const lead=leads.find(l=>l._id===id);
 
     if(!lead)return;

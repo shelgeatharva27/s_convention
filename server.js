@@ -23,15 +23,13 @@ const LeadSchema = new mongoose.Schema({
     time:String,
     status:String,
     event:String,
+
     advance:Number,
     bookingAmount:Number,
     due:Number,
     fullPayment:Number,
-    maintenance:Number,advance:Number,
-    bookingAmount:Number,
-    due:Number,
-    fullPayment:Number,
     maintenance:Number,
+
     notes:String
 
 });
@@ -72,7 +70,28 @@ app.post("/addLead", async(req,res)=>{
 
 });
 
+app.put("/updateLead/:id", async(req,res)=>{
 
+    try{
+
+        await Lead.findByIdAndUpdate(
+            req.params.id,
+            req.body
+        );
+
+        res.json({
+            success:true
+        });
+
+    }catch(err){
+
+        res.status(500).json({
+            error:err
+        });
+
+    }
+
+});
 // DELETE LEAD
 app.delete("/deleteLead/:id", async(req,res)=>{
 
