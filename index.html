@@ -591,7 +591,41 @@ textarea{
             <div class="panel-header">
                 <div class="panel-title">Event Calendar</div>
             </div>
-    
+            
+            <div style="display:flex;gap:10px;margin-bottom:20px">
+            
+                <select id="yearSelect"
+                        onchange="showMonthDropdown()">
+            
+                    <option value="">
+                        Select Year
+                    </option>
+            
+                </select>
+            
+                <select id="monthSelect"
+                        onchange="jumpToDate()"
+                        style="display:none">
+            
+                    <option value="">Select Month</option>
+            
+                    <option value="0">January</option>
+                    <option value="1">February</option>
+                    <option value="2">March</option>
+                    <option value="3">April</option>
+                    <option value="4">May</option>
+                    <option value="5">June</option>
+                    <option value="6">July</option>
+                    <option value="7">August</option>
+                    <option value="8">September</option>
+                    <option value="9">October</option>
+                    <option value="10">November</option>
+                    <option value="11">December</option>
+            
+                </select>
+            
+            </div>
+            
             <div id="calendarView"></div>
     
         </div>
@@ -1028,6 +1062,8 @@ calendar=new FullCalendar.Calendar(calendarEl,{
 
     initialView:'dayGridMonth',
 
+    initialDate:new Date(),
+
     height:'auto',
 
     events:events,
@@ -1200,8 +1236,83 @@ function renderExpenses(){
     });
 }
 
+function populateYears(){
+
+const yearSelect =
+    document.getElementById("yearSelect");
+
+const currentYear =
+    new Date().getFullYear();
+
+for(let year=2020;
+    year<=currentYear+10;
+    year++){
+
+    yearSelect.innerHTML += `
+        <option value="${year}">
+            ${year}
+        </option>
+    `;
+}
+}
+
+function showMonthDropdown(){
+
+const year =
+    document.getElementById(
+        "yearSelect"
+    ).value;
+
+const monthSelect =
+    document.getElementById(
+        "monthSelect"
+    );
+
+if(year){
+
+    monthSelect.style.display =
+        "block";
+
+    monthSelect.value="";
+
+}else{
+
+    monthSelect.style.display =
+        "none";
+}
+}
+
+function jumpToDate(){
+
+if(!calendar) return;
+
+const year =
+    document.getElementById(
+        "yearSelect"
+    ).value;
+
+const month =
+    document.getElementById(
+        "monthSelect"
+    ).value;
+
+if(!year || month==="") return;
+
+const targetDate =
+    new Date(
+        Number(year),
+        Number(month),
+        1
+    );
+
+calendar.gotoDate(
+    targetDate
+);
+}
+
 loadLeads();
 renderExpenses();
+populateYears();
 
 </script>
 <div class="modal" id="followUpModal">
