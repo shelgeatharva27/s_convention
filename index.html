@@ -493,7 +493,16 @@ textarea{
                 <div class="panel-title">Lead Management</div>
             </div>
 
-            <input type="text" id="search" class="search-box" placeholder="Search Leads..." onkeyup="filterLeads()">
+            <input type="text" id="search" class="search-box"
+       placeholder="Search Leads..."
+       onkeyup="filterLeads()">
+
+<select id="statusFilter" onchange="renderLeads()">
+    <option value="all">All Leads</option>
+    <option value="accepted">Accepted</option>
+    <option value="followup">Follow Up</option>
+    <option value="rejected">Rejected</option>
+</select>
 
             <div class="grid" id="leadContainer"></div>
 
@@ -888,52 +897,62 @@ async function loadLeads(){
 
 function renderLeads(){
 
-    const container=document.getElementById('leadContainer');
+const container = document.getElementById('leadContainer');
 
-    container.innerHTML='';
+const statusFilter =
+    document.getElementById('statusFilter')?.value || 'all';
 
-    leads.forEach(lead=>{
+container.innerHTML = '';
 
-        container.innerHTML += `
+let filteredLeads = leads;
 
-        <div class="lead-card">
+if(statusFilter !== 'all'){
+    filteredLeads = leads.filter(
+        lead => lead.status === statusFilter
+    );
+}
 
-            <h2>${lead.name}</h2>
+filteredLeads.forEach(lead=>{
 
-            <p>📞 ${lead.phone}</p>
-            <p>📍 ${lead.location}</p>
-            <p>🎉 ${lead.event}</p>
-            <p>📅 ${lead.bookingDate}</p>
-            
-            <p>💵 Advance: ₹${lead.advance || 0}</p>
+    container.innerHTML += `
 
-            <p>📦 Booking: ₹${lead.bookingAmount || 0}</p>
+    <div class="lead-card">
 
-            <p>⏳ Due: ₹${lead.due || 0}</p>
+        <h2>${lead.name}</h2>
 
-            <p>✅ Full Payment: ₹${lead.fullPayment || 0}</p>
+        <p>📞 ${lead.phone}</p>
+        <p>📍 ${lead.location}</p>
+        <p>🎉 ${lead.event}</p>
+        <p>📅 ${lead.bookingDate}</p>
 
-            <p>🛠 Maintenance: ₹${lead.maintenance || 0}</p>
-            <span class="badge ${lead.status}">
-                ${lead.status}
-            </span>
+        <p>💵 Advance: ₹${lead.advance || 0}</p>
+        <p>📦 Booking: ₹${lead.bookingAmount || 0}</p>
+        <p>⏳ Due: ₹${lead.due || 0}</p>
+        <p>✅ Full Payment: ₹${lead.fullPayment || 0}</p>
+        <p>🛠 Maintenance: ₹${lead.maintenance || 0}</p>
 
-            <div class="actions">
+        <span class="badge ${lead.status}">
+            ${lead.status}
+        </span>
 
-                <button class="btn edit" onclick="editLead('${lead._id}')">
-                    Edit
-                </button>
+        <div class="actions">
 
-                <button class="btn delete" onclick="deleteLead('${lead._id}')">
-                    Delete
-                </button>
+            <button class="btn edit"
+                    onclick="editLead('${lead._id}')">
+                Edit
+            </button>
 
-            </div>
+            <button class="btn delete"
+                    onclick="deleteLead('${lead._id}')">
+                Delete
+            </button>
 
         </div>
 
-        `;
-    });
+    </div>
+
+    `;
+});
 }
 
 function renderBookings(){
@@ -1186,20 +1205,24 @@ function editLead(id){
 
 function filterLeads(){
 
-    const search=document.getElementById('search').value.toLowerCase();
+const search =
+    document.getElementById('search')
+    .value
+    .toLowerCase();
 
-    const cards=document.querySelectorAll('.lead-card');
+const cards =
+    document.querySelectorAll('.lead-card');
 
-    cards.forEach(card=>{
+cards.forEach(card=>{
 
-        const text=card.innerText.toLowerCase();
+    const text =
+        card.innerText.toLowerCase();
 
-        if(text.includes(search)){
-            card.style.display='block';
-        }else{
-            card.style.display='none';
-        }
-    });
+    card.style.display =
+        text.includes(search)
+        ? 'block'
+        : 'none';
+});
 }
 
 function addExpense(){
