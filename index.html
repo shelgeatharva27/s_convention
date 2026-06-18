@@ -432,6 +432,9 @@ textarea{
         <button onclick="showSection('finance')">Finance</button>
         <button onclick="showSection('analytics')">Analytics</button>
         <button onclick="showSection('calendar')">Calendar</button>
+        <button onclick="showSection('inventory')">
+            Inventory
+        </button>
     </div>
 </div>
 
@@ -640,6 +643,33 @@ textarea{
         </div>
     
     </div>
+    <div id="inventory" class="section">
+
+        <div class="panel">
+    
+            <div class="panel-header">
+    
+                <div class="panel-title">
+                    Inventory Management
+                </div>
+    
+                <button class="btn"
+                        onclick="openInventoryModal()">
+    
+                    + Add Item
+    
+                </button>
+    
+            </div>
+    
+            <div class="grid"
+                 id="inventoryContainer">
+    
+            </div>
+    
+        </div>
+    
+    </div>
 
 </div>
 
@@ -679,7 +709,45 @@ textarea{
     </div>
 
 </div>
+<div class="modal"
+     id="inventoryModal">
 
+    <div class="modal-content">
+
+        <span class="close"
+              onclick="closeInventoryModal()">
+
+            ×
+
+        </span>
+
+        <h1 style="margin-bottom:20px">
+
+            Inventory Item
+
+        </h1>
+
+        <input
+            type="text"
+            id="itemName"
+            placeholder="Item Name">
+
+        <input
+            type="number"
+            id="itemQuantity"
+            placeholder="Quantity">
+
+        <button
+            class="btn"
+            onclick="saveInventory()">
+
+            Save Item
+
+        </button>
+
+    </div>
+
+</div>
 <div class="notification" id="notification">
     Saved Successfully
 </div>
@@ -689,8 +757,14 @@ textarea{
 const API = "";
 
 let leads = [];
+
 let expenses = [];
+
+let inventory = [];
+
 let editId = null;
+
+let inventoryEditId = null;
 
 function showSection(sectionId){
 
@@ -1224,7 +1298,153 @@ cards.forEach(card=>{
         : 'none';
 });
 }
+async function loadInventory(){
 
+const response =
+    await fetch(`${API}/getInventory`);
+
+inventory =
+    await response.json();
+
+renderInventory();
+}
+
+function renderInventory(){
+
+const container =
+    document.getElementById(
+        'inventoryContainer'
+    );
+
+container.innerHTML='';
+
+inventory.forEach(item=>{
+
+    container.innerHTML += `
+
+    <div class="lead-card">
+
+        <h2>${item.itemName}</h2>
+
+        <p>
+            Quantity:
+            ${item.quantity}
+        </p>
+
+        <div class="actions">
+
+            <button
+                class="btn edit"
+                onclick="editInventory('${item._id}')">
+
+                Edit
+
+            </button>
+
+            <button
+                class="btn delete"
+                onclick="deleteInventory('${item._id}')">
+
+                Delete
+
+            </button>
+
+        </div>
+
+    </div>
+
+    `;
+});
+}
+
+function openInventoryModal(){
+
+document.getElementById(
+    'inventoryModal'
+).style.display='flex';
+}
+
+function closeInventoryModal(){
+
+document.getElementById(
+    'inventoryModal'
+).style.display='none';
+}
+
+async function saveInventory(){
+
+const data={
+
+    itemName:
+    document.getElementById(
+        'itemName'
+    ).value,
+
+    quantity:
+    document.getElementById(
+        'itemQuantity'
+    ).value
+};
+
+const url = inventoryEditId
+    ? `${API}/updateInventory/${inventoryEditId}`
+    : `${API}/addInventory`;
+
+const method =
+    inventoryEditId
+    ? 'PUT'
+    : 'POST';
+
+await fetch(url,{
+
+    method,
+
+    headers:{
+        'Content-Type':'application/json'
+    },
+
+    body:JSON.stringify(data)
+
+});
+
+inventoryEditId = null;
+
+closeInventoryModal();
+
+loadInventory();
+}
+
+function editInventory(id){
+
+const item =
+    inventory.find(
+        i=>i._id===id
+    );
+
+inventoryEditId=id;
+
+document.getElementById(
+    'itemName'
+).value=item.itemName;
+
+document.getElementById(
+    'itemQuantity'
+).value=item.quantity;
+
+openInventoryModal();
+}
+
+async function deleteInventory(id){
+
+await fetch(
+    `${API}/deleteInventory/${id}`,
+    {
+        method:'DELETE'
+    }
+);
+
+loadInventory();
+}
 function addExpense(){
 
     const name=document.getElementById('expenseName').value;
@@ -1334,7 +1554,11 @@ calendar.gotoDate(
 }
 
 loadLeads();
+
+loadInventory();
+
 renderExpenses();
+
 populateYears();
 
 </script>

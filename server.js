@@ -35,7 +35,17 @@ const LeadSchema = new mongoose.Schema({
 });
 
 const Lead = mongoose.model("Lead", LeadSchema);
+const InventorySchema = new mongoose.Schema({
 
+    itemName:String,
+    quantity:Number
+
+});
+
+const Inventory = mongoose.model(
+    "Inventory",
+    InventorySchema
+);
 
 // GET LEADS
 app.get("/getLeads", async(req,res)=>{
@@ -102,7 +112,78 @@ app.delete("/deleteLead/:id", async(req,res)=>{
     });
 
 });
+// GET INVENTORY
 
+app.get("/getInventory", async(req,res)=>{
+
+    const items = await Inventory.find();
+
+    res.json(items);
+
+});
+
+// ADD INVENTORY
+
+app.post("/addInventory", async(req,res)=>{
+
+    try{
+
+        const item = new Inventory(req.body);
+
+        await item.save();
+
+        res.json({
+            success:true
+        });
+
+    }catch(err){
+
+        res.status(500).json({
+            error:err
+        });
+
+    }
+
+});
+
+// UPDATE INVENTORY
+
+app.put("/updateInventory/:id", async(req,res)=>{
+
+    try{
+
+        await Inventory.findByIdAndUpdate(
+            req.params.id,
+            req.body
+        );
+
+        res.json({
+            success:true
+        });
+
+    }catch(err){
+
+        res.status(500).json({
+            error:err
+        });
+
+    }
+
+});
+
+// DELETE INVENTORY
+
+app.delete("/deleteInventory/:id", async(req,res)=>{
+
+    await Inventory.findByIdAndDelete(
+        req.params.id
+    );
+
+    res.json({
+        success:true
+    });
+
+});
 
 // SERVE STATIC FILES
 app.use(express.static(__dirname));
